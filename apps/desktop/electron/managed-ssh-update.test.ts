@@ -284,11 +284,15 @@ test('POSIX managed launcher executes the updater command and atomically publish
   const home = await mkdtemp(path.join(os.tmpdir(), 'hermes-managed-launch-'))
 
   try {
+    // Own the executable fixture: /bin/true exists on Linux, but not macOS.
+    const updater = path.join(home, 'test-updater')
+
+    await writeFile(updater, '#!/bin/sh\nexit 0\n', { mode: 0o700 })
     const command = buildPosixManagedUpdateLaunch(
       {
         ssh: { exec: async () => '' },
         platform: 'Linux',
-        hermesPath: '/bin/true',
+        hermesPath: updater,
         hermesHome: home
       },
       CORRELATION
